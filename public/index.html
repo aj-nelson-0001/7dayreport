@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Freebuff · 7-day report</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c2330;
+    --line: #2a3140;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #4ea1ff;
+    --good: #3fb950;
+    --warn: #d29922;
+    --bad: #f85149;
+    --active: #238636;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 60px; }
+  header.top { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+  h1 { font-size: 24px; margin: 0; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .actions { display: flex; gap: 8px; }
+  button {
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--active); border-color: var(--active); }
+  button:disabled { opacity: .55; cursor: default; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 22px 0; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .card .value { font-size: 30px; font-weight: 700; margin-top: 6px; }
+  .card .foot { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 18px; }
+  section.panel h2 { font-size: 15px; margin: 0 0 16px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+
+  /* 7-day strip */
+  .strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+  .day { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 10px; text-align: center; }
+  .day.today { border-color: var(--accent); }
+  .day .dot { width: 12px; height: 12px; border-radius: 50%; margin: 0 auto 8px; }
+  .day.active .dot { background: var(--good); box-shadow: 0 0 8px rgba(63,185,80,.5); }
+  .day.inactive .dot { background: var(--bad); }
+  .day .dow { font-weight: 600; font-size: 13px; }
+  .day .date { color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .day .badge { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 999px; margin-top: 8px; }
+  .badge.streak { background: rgba(63,185,80,.15); color: var(--good); }
+  .badge.recorded { background: rgba(78,161,255,.15); color: var(--accent); }
+  .badge.pend { background: rgba(210,153,34,.15); color: var(--warn); }
+  .day .nums { margin-top: 8px; font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .day .nums b { color: var(--text); }
+
+  /* bar */
+  .barRow { margin-bottom: 14px; }
+  .barRow .head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .barRow .head .pct { color: var(--muted); }
+  .track { height: 10px; background: var(--panel-2); border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .fill { height: 100%; background: var(--accent); }
+  .fill.warn { background: var(--warn); }
+  .fill.danger { background: var(--bad); }
+
+  /* prices */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .free { color: var(--good); }
+  .notice { color: var(--warn); font-size: 11px; }
+
+  /* projects */
+  .projGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .proj { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
+  .projHead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .projName { font-weight: 650; font-size: 14px; letter-spacing: .01em; }
+  .projStatus { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .st-active   { background: rgba(63,185,80,.15); color: var(--good); }
+  .st-recent   { background: rgba(78,161,255,.15); color: var(--accent); }
+  .st-dormant  { background: rgba(210,153,34,.15); color: var(--warn); }
+  .st-archived { background: rgba(139,148,158,.15); color: var(--muted); }
+  .projMeta { color: var(--muted); font-size: 11.5px; margin-top: 6px; line-height: 1.55; }
+  .projMeta b { color: var(--text); font-weight: 600; }
+  .projDesc { color: var(--text); opacity: .8; font-size: 12px; margin-top: 7px; line-height: 1.5; }
+  .docBlock { margin-top: 9px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .docFile { color: var(--accent); font-size: 11px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .docCounts { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  .docCounts .done { color: var(--good); }
+  .docSec { margin-top: 7px; }
+  .docSec .secTitle { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .docSec ul { margin: 3px 0 0; padding-left: 16px; }
+  .docSec li { font-size: 12px; color: var(--text); opacity: .85; margin: 2px 0; }
+  .projEmpty { color: var(--muted); font-size: 12px; font-style: italic; margin-top: 7px; }
+  .projDelta { font-size: 11.5px; color: var(--muted); margin-top: 7px; border-top: 1px dashed var(--line); padding-top: 6px; }
+  .projDelta b { color: var(--accent); font-weight: 600; }
+  .proj { cursor: pointer; }
+  .proj:hover { border-color: var(--accent); }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-start;
+           justify-content: center; padding: 40px 16px; overflow: auto; z-index: 50; }
+  .modalBox { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+              max-width: 760px; width: 100%; padding: 18px 20px 22px; }
+  .modalHead { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .modalHead .projName { font-size: 16px; }
+  .modalClose { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 8px;
+                font-size: 16px; line-height: 1; padding: 4px 10px; cursor: pointer; }
+  .modalClose:hover { color: var(--text); border-color: var(--accent); }
+  .projSearch { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+                padding: 5px 9px; font-size: 12.5px; width: 210px; }
+  .projSearch:focus { outline: none; border-color: var(--accent); }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip { font-size: 11.5px; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--panel-2); color: var(--muted); cursor: pointer; }
+  .chip.on { border-color: var(--accent); color: var(--accent); background: rgba(78,161,255,.1); }
+  .chip:hover { border-color: var(--accent); }
+  .sortRow { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .sortRow select { background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+                    border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+
+  .note { background: rgba(210,153,34,.08); border: 1px solid rgba(210,153,34,.35); color: #e3b341;
+          border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-top: 6px; }
+  .err { background: rgba(248,81,73,.1); border: 1px solid rgba(248,81,73,.4); color: #ff7b72;
+         border-radius: 10px; padding: 12px 14px; font-size: 13px; white-space: pre-wrap; }
+  .muted { color: var(--muted); }
+  footer { color: var(--muted); font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Freebuff · 7-day report</h1>
+      <div class="sub" id="sub">Loading…</div>
+    </div>
+    <div class="actions">
+      <button id="logBtn" class="primary" title="Capture a snapshot now (upserts today)">Log today</button>
+      <button id="refreshBtn">Refresh</button>
+    </div>
+  </header>
+
+  <div id="error"></div>
+
+  <div class="cards" id="cards" style="display:none"></div>
+
+  <section class="panel" id="stripPanel" style="display:none">
+    <h2>Activity window</h2>
+    <div class="strip" id="strip"></div>
+    <div class="note" id="note" style="display:none"></div>
+  </section>
+
+  <section class="panel" id="windowsPanel" style="display:none">
+    <h2>Free windows (rolling)</h2>
+    <div id="windows"></div>
+  </section>
+
+  <section class="panel" id="pricesPanel" style="display:none">
+    <h2>Model prices (freebucks)</h2>
+    <table>
+      <thead><tr><th>Model</th><th class="num">Price</th><th>Notice</th></tr></thead>
+      <tbody id="prices"></tbody>
+    </table>
+  </section>
+
+  <section class="panel" id="projectsPanel" style="display:none">
+    <h2>Project progress <span id="projCounts" class="muted" style="font-weight:400;text-transform:none;letter-spacing:0"></span></h2>
+    <div class="filters" id="projFilters"></div>
+    <div class="sortRow">
+      <label for="projSort">Sort</label>
+      <select id="projSort">
+        <option value="activity">Recent activity</option>
+        <option value="name">Name</option>
+        <option value="dirty">Uncommitted files</option>
+        <option value="status">Status</option>
+      </select>
+      <input id="projSearch" class="projSearch" type="search" placeholder="Search projects & docs…" aria-label="Search projects and docs">
+      <span id="projShown"></span>
+    </div>
+    <div class="projGrid" id="projGrid"></div>
+    <div class="note" id="projNote" style="display:none"></div>
+  </section>
+
+  <div class="modal" id="projModal" style="display:none">
+    <div class="modalBox">
+      <div class="modalHead">
+        <span id="projModalTitle"></span>
+        <button class="modalClose" id="projModalClose" title="Close (Esc)">×</button>
+      </div>
+      <div id="projModalBody"></div>
+    </div>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const fmt = (n) => (typeof n === "number" ? n.toLocaleString("en-US") : "—");
+const pct = (used, limit) => (!limit ? 0 : Math.max(0, Math.min(100, Math.round((used/limit)*100))));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ago = (days) => days === null || days === undefined ? "never"
+  : days === 0 ? "today" : days === 1 ? "yesterday" : `${days}d ago`;
+
+function bar(label, used, limit) {
+  const p = pct(used, limit);
+  const cls = p >= 90 ? "danger" : p >= 70 ? "warn" : "";
+  return `<div class="barRow">
+    <div class="head"><span>${label}</span><span class="pct">${fmt(used)} / ${fmt(limit)} · ${p}%</span></div>
+    <div class="track"><div class="fill ${cls}" style="width:${p}%"></div></div>
+  </div>`;
+}
+
+function render(report) {
+  const t = report.totals, c = report.current, src = report.source;
+
+  document.getElementById("sub").textContent =
+    `Window ${report.window[0]} → ${report.window[6]} · ${report.timeZone} · generated ${new Date(report.generatedAt).toLocaleString()}`;
+
+  // Cards
+  const cards = document.getElementById("cards");
+  cards.style.display = "";
+  cards.innerHTML = `
+    <div class="card"><div class="label">Days active</div>
+      <div class="value" style="color:var(--good)">${t.daysActive}<span style="color:var(--muted);font-size:18px">/${t.expectedDays}</span></div>
+      <div class="foot">derived from ${c.streak}-day streak</div></div>
+    <div class="card"><div class="label">Current streak</div>
+      <div class="value">${fmt(c.streak)}</div>
+      <div class="foot">days · bonus ${t.dailyBonus}/day</div></div>
+    <div class="card"><div class="label">Bonus earned (window)</div>
+      <div class="value" style="color:var(--good)">+${fmt(t.streakBonusEarned)}</div>
+      <div class="foot">freebucks from streak</div></div>
+    <div class="card"><div class="label">Balance</div>
+      <div class="value">${fmt(c.balance)}</div>
+      <div class="foot">wallet ${fmt(c.wallet)} + daily ${fmt(c.dailyPool)}</div></div>
+    <div class="card"><div class="label">Days with spend data</div>
+      <div class="value" style="color:${t.daysRecorded ? "var(--accent)" : "var(--warn)"}">${t.daysRecorded}<span style="color:var(--muted);font-size:18px">/${t.expectedDays}</span></div>
+      <div class="foot">${t.hasRecordedSpend ? "spent (recorded): "+fmt(t.totalSpentRecorded) : "run logger to accumulate"}</div></div>`;
+
+  // Strip
+  document.getElementById("stripPanel").style.display = "";
+  document.getElementById("strip").innerHTML = report.days.map(d => {
+    const dow = DOW[new Date(d.day + "T12:00:00Z").getUTCDay()];
+    let badge;
+    if (d.recorded) badge = `<span class="badge recorded">logged</span>`;
+    else if (d.active) badge = `<span class="badge streak">streak</span>`;
+    else badge = `<span class="badge pend">no data</span>`;
+    const nums = d.recorded
+      ? `spent <b>${fmt(d.spent)}</b><br/>balance <b>${fmt(d.balance)}</b>`
+      : (d.active ? `<span class="muted">active (streak)</span>` : `<span class="muted">—</span>`);
+    return `<div class="day ${d.active ? "active" : "inactive"} ${d.isToday ? "today" : ""}">
+      <div class="dot"></div>
+      <div class="dow">${dow}</div>
+      <div class="date">${d.day.slice(5)}</div>
+      ${badge}
+      <div class="nums">${nums}</div>
+    </div>`;
+  }).join("");
+
+  const note = document.getElementById("note");
+  note.style.display = "";
+  note.textContent = src.note;
+
+  // Windows
+  if (c.freeWindows) {
+    document.getElementById("windowsPanel").style.display = "";
+    const w = c.freeWindows;
+    document.getElementById("windows").innerHTML =
+      bar("Day", w.dayUsed, w.dayLimit) +
+      bar("Rolling week (7-day)", w.weekUsed, w.weekLimit) +
+      bar("Month", w.monthUsed, w.monthLimit);
+  }
+
+  // Prices
+  const prices = c.prices || {};
+  const entries = Object.entries(prices).sort((a,b) => a[1]-b[1]);
+  if (entries.length) {
+    document.getElementById("pricesPanel").style.display = "";
+    document.getElementById("prices").innerHTML = entries.map(([m, p]) => {
+      const notice = c.priceNotices?.[m] || "";
+      return `<tr><td>${m}</td>
+        <td class="num ${p === 0 ? "free" : ""}">${p === 0 ? "FREE" : fmt(p)}</td>
+        <td class="notice">${notice}</td></tr>`;
+    }).join("");
+  }
+
+  document.getElementById("foot").textContent =
+    `Live fetched ${new Date(src.liveFrom).toLocaleString()} · history ${src.historyDays} day(s) · newest snapshot ${src.newestSnapshotDay || "none"}`;
+}
+
+// ---------- projects ----------
+
+let PROJ = null;          // full payload from /api/projects
+let PROJ_SNAP = null;     // latest daily snapshot row (deltas vs it)
+let projFilter = "all";   // "all" | "git" | "dir" | status name
+let projQuery = "";       // free-text search across names + doc content
+
+/** Case-insensitive match across every text field a card/detail shows. */
+function projMatches(p, q) {
+  const hay = [
+    p.name, p.description, p.status, p.kind,
+    p.git?.branch, p.git?.lastCommitSubject, p.git?.remote,
+    ...(p.git?.recentCommits || []).map((c) => c.subject),
+    ...p.docs.flatMap((d) => [d.file, d.description, ...d.sections.flatMap((s) => [s.heading, ...s.items])]),
+  ].filter(Boolean).join("\n").toLowerCase();
+  return hay.includes(q);
+}
+
+const STATUS_ORDER = ["active", "recent", "dormant", "archived"];
+
+const signed = (n) => (n > 0 ? `+${n}` : `${n}`);
+
+/** "since snapshot <day>" deltas for one project, or "" when nothing moved. */
+function projDelta(p) {
+  if (!PROJ_SNAP) return "";
+  const prev = PROJ_SNAP.projects.find((r) => r.name === p.name);
+  if (!prev) return `<div class="projDelta">new since snapshot ${PROJ_SNAP.day}</div>`;
+  const bits = [];
+  if (p.kind === "git" && prev.commits != null && p.git?.commits != null && p.git.commits !== prev.commits)
+    bits.push(`${signed(p.git.commits - prev.commits)} commits`);
+  if (p.files !== prev.files) bits.push(`${signed(p.files - prev.files)} files`);
+  const done = p.docs.reduce((n, d) => n + (d.done || 0), 0);
+  const open = p.docs.reduce((n, d) => n + (d.open || 0), 0);
+  if (done !== prev.done) bits.push(`${signed(done - prev.done)} done`);
+  if (open !== prev.open) bits.push(`${signed(open - prev.open)} open`);
+  if (prev.status !== p.status) bits.push(`status ${prev.status} → ${p.status}`);
+  if (!bits.length) return "";
+  return `<div class="projDelta">since snapshot ${PROJ_SNAP.day}: <b>${bits.join(" · ")}</b></div>`;
+}
+
+function projCard(p) {
+  const facts = [];
+  if (p.kind === "git") {
+    if (p.git?.branch) facts.push(`⎇ <b>${esc(p.git.branch)}</b>`);
+    if (p.git?.dirty) facts.push(`<span style="color:var(--warn)">✎ <b>${p.git.dirty}</b> uncommitted</span>`);
+    else facts.push(`clean`);
+    if (p.git?.commits !== null && p.git?.commits !== undefined) facts.push(`${fmt(p.git.commits)} commits`);
+    if (p.git?.lastCommitDate) facts.push(`last commit <b>${p.git.lastCommitDate}</b>`);
+    else facts.push(`no commits yet`);
+  } else {
+    facts.push(`${fmt(p.files)} files · newest <b>${p.newestFile || "—"}</b>`);
+  }
+
+  let docs = "";
+  if (!p.docs.length) {
+    docs = `<div class="projEmpty">no progress docs found</div>`;
+  } else {
+    docs = p.docs.map((d) => {
+      const counts = (d.done || d.open)
+        ? `<div class="docCounts"><span class="done">✓ ${d.done}</span> done · <span>${d.open}</span> open${d.updated ? ` · updated ${d.updated}` : ""}</div>`
+        : ``;
+      const secs = d.sections.map((s) => `
+        <div class="docSec"><div class="secTitle">${esc(s.heading)}</div>
+          <ul>${s.items.map((it) => `<li>${esc(it)}</li>`).join("")}</ul></div>`).join("");
+      const desc = d.description && !/readme/i.test(d.file)
+        ? `<div class="projDesc">${esc(d.description)}</div>` : ``;
+      return `<div class="docBlock"><span class="docFile">${esc(d.file)}</span>${counts}${desc}${secs}</div>`;
+    }).join("");
+  }
+
+  const commits = p.git?.recentCommits?.length
+    ? `<div class="docBlock"><div class="secTitle">recent commits</div><ul style="margin:4px 0 0;padding-left:16px">${
+        p.git.recentCommits.map((c) => `<li class="projMeta" style="margin:2px 0"><b>${esc(c.date)}</b> ${esc(c.subject)}</li>`).join("")
+      }</ul></div>`
+    : "";
+
+  return `<div class="proj" data-status="${p.status}" data-kind="${p.kind}" data-days="${p.daysSinceActivity ?? 9999}" data-dirty="${p.git?.dirty ?? 0}" data-name="${esc(p.name)}">
+    <div class="projHead">
+      <span class="projName">${esc(p.name)}</span>
+      <span class="projStatus st-${p.status}">${p.status}</span>
+    </div>
+    <div class="projMeta">${facts.join(" · ")} · activity <b>${ago(p.daysSinceActivity)}</b></div>
+    ${p.description ? `<div class="projDesc">${esc(p.description)}</div>` : ""}
+    ${docs}
+    ${commits}
+    ${projDelta(p)}
+  </div>`;
+}
+
+function renderProjects() {
+  if (!PROJ) return;
+  const { counts, projects, generatedAt } = PROJ;
+  document.getElementById("projectsPanel").style.display = "";
+  document.getElementById("projCounts").textContent =
+    `· ${counts.total} total · ${counts.active7d} active this week · ${counts.git} git · ${counts.archived} archived · scanned ${new Date(generatedAt).toLocaleTimeString()}` +
+    (PROJ_SNAP ? ` · vs snapshot ${PROJ_SNAP.day}` : " · no snapshot yet (run node snapshot.js)");
+
+  // Filter chips: all / git / dirs / each status present.
+  const statuses = STATUS_ORDER.filter((s) => projects.some((p) => p.status === s));
+  const chips = [
+    ["all", `all ${counts.total}`],
+    ["git", `git ${counts.git}`],
+    ["dir", `dirs ${counts.dirs}`],
+    ...statuses.map((s) => [s, `${s} ${projects.filter((p) => p.status === s).length}`]),
+  ];
+  document.getElementById("projFilters").innerHTML = chips
+    .map(([k, label]) => `<span class="chip ${projFilter === k ? "on" : ""}" data-f="${k}">${label}</span>`)
+    .join("");
+
+  drawProjGrid();
+}
+
+function drawProjGrid() {
+  let list = PROJ.projects.filter((p) =>
+    projFilter === "all" ? true
+      : projFilter === "git" || projFilter === "dir" ? p.kind === projFilter
+      : p.status === projFilter,
+  );
+  if (projQuery) list = list.filter((p) => projMatches(p, projQuery));
+
+  const sort = document.getElementById("projSort").value;
+  const statusRank = (s) => STATUS_ORDER.indexOf(s);
+  list = [...list].sort((a, b) => {
+    if (sort === "name") return a.name.localeCompare(b.name);
+    if (sort === "dirty") return (b.git?.dirty ?? 0) - (a.git?.dirty ?? 0);
+    if (sort === "status") return statusRank(a.status) - statusRank(b.status) || a.name.localeCompare(b.name);
+    // activity: null dates last
+    const ad = a.daysSinceActivity ?? 9999, bd = b.daysSinceActivity ?? 9999;
+    return ad - bd || a.name.localeCompare(b.name);
+  });
+
+  document.getElementById("projGrid").innerHTML = list.length
+    ? list.map(projCard).join("")
+    : `<div class="projEmpty">no projects match${projQuery ? ` “${esc(projQuery)}”` : " the current filter"}</div>`;
+  document.getElementById("projShown").textContent = `${list.length} shown`;
+
+  document.querySelectorAll("#projFilters .chip").forEach((el) => {
+    el.classList.toggle("on", el.dataset.f === projFilter);
+    el.onclick = () => { projFilter = el.dataset.f; drawProjGrid();
+      document.querySelectorAll("#projFilters .chip").forEach((c) =>
+        c.classList.toggle("on", c.dataset.f === projFilter)); };
+  });
+}
+
+async function loadProjects(force = false) {
+  const note = document.getElementById("projNote");
+  try {
+    const [res, histRes] = await Promise.all([
+      fetch(`/api/projects${force ? "?force=1" : ""}`),
+      fetch("/api/projects/history").catch(() => null),
+    ]);
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || res.statusText);
+    PROJ = data;
+    // Latest snapshot row powers the "since snapshot" deltas; non-fatal if absent.
+    PROJ_SNAP = null;
+    if (histRes && histRes.ok) {
+      try {
+        const rows = (await histRes.json()).rows;
+        PROJ_SNAP = rows.length ? rows[rows.length - 1] : null;
+      } catch { /* no history — deltas stay off */ }
+    }
+    renderProjects();
+    note.style.display = "none";
+  } catch (err) {
+    note.style.display = "";
+    note.textContent = `Projects scan failed: ${String(err.message || err)}`;
+  }
+}
+
+document.getElementById("projSort").addEventListener("change", drawProjGrid);
+
+// Debounced free-text search — matches names, descriptions, commit subjects,
+// doc files/headings/items.
+let projSearchTimer = null;
+document.getElementById("projSearch").addEventListener("input", (e) => {
+  clearTimeout(projSearchTimer);
+  projSearchTimer = setTimeout(() => {
+    projQuery = e.target.value.trim().toLowerCase();
+    drawProjGrid();
+  }, 120);
+});
+
+// ---------- project detail modal ----------
+
+function openProjModal(p) {
+  const gitBlock = p.kind === "git" ? `
+    <div class="docBlock"><div class="secTitle">git</div><div class="projMeta">
+      branch <b>${esc(p.git?.branch ?? "—")}</b> · ${fmt(p.git?.commits ?? 0)} commits · <b>${p.git?.dirty ?? 0}</b> uncommitted<br>
+      last commit <b>${esc(p.git?.lastCommitDate ?? "—")}</b>${p.git?.lastCommitSubject ? ` — ${esc(p.git.lastCommitSubject)}` : ""}<br>
+      first commit <b>${esc(p.git?.firstCommitDate ?? "—")}</b>${p.git?.remote ? `<br>remote <b>${esc(p.git.remote)}</b>` : ""}
+    </div></div>` : "";
+
+  const docsHtml = p.docs.length
+    ? p.docs.map((d) => {
+        const counts = (d.done || d.open)
+          ? `<div class="docCounts"><span class="done">✓ ${d.done}</span> done · <span>${d.open}</span> open${d.updated ? ` · updated ${d.updated}` : ""}</div>`
+          : ``;
+        const secs = d.sections.map((s) => `
+          <div class="docSec"><div class="secTitle">${esc(s.heading)}</div>
+            <ul>${s.items.map((it) => `<li>${esc(it)}</li>`).join("")}</ul></div>`).join("");
+        return `<div class="docBlock"><span class="docFile">${esc(d.file)}</span>${counts}
+          ${d.description ? `<div class="projDesc">${esc(d.description)}</div>` : ""}${secs}</div>`;
+      }).join("")
+    : `<div class="projEmpty">no progress docs found</div>`;
+
+  const commitsHtml = p.git?.recentCommits?.length
+    ? `<div class="docBlock"><div class="secTitle">recent commits</div><ul style="margin:4px 0 0;padding-left:16px">${
+        p.git.recentCommits.map((c) => `<li class="projMeta" style="margin:2px 0"><b>${esc(c.date)}</b> ${esc(c.subject)}</li>`).join("")
+      }</ul></div>`
+    : "";
+
+  document.getElementById("projModalTitle").innerHTML =
+    `<span class="projName">${esc(p.name)}</span> <span class="projStatus st-${p.status}">${p.status}</span>`;
+  document.getElementById("projModalBody").innerHTML = `
+    <div class="projMeta">${p.kind === "git" ? "git repo" : "directory"} · activity <b>${ago(p.daysSinceActivity)}</b>${p.activityDate ? ` (${p.activityDate})` : ""} · ${fmt(p.files)} files · ${p.docs.length} progress doc${p.docs.length === 1 ? "" : "s"}</div>
+    ${p.description ? `<div class="projDesc">${esc(p.description)}</div>` : ""}
+    ${gitBlock}
+    ${docsHtml}
+    ${commitsHtml}
+    ${projDelta(p)}`;
+  document.getElementById("projModal").style.display = "flex";
+}
+
+function closeProjModal() {
+  document.getElementById("projModal").style.display = "none";
+}
+
+// One-time bindings: delegation survives every grid re-render.
+document.getElementById("projGrid").addEventListener("click", (e) => {
+  const card = e.target.closest(".proj");
+  if (!card) return;
+  const p = PROJ?.projects.find((x) => x.name === card.dataset.name);
+  if (p) openProjModal(p);
+});
+document.getElementById("projModalClose").addEventListener("click", closeProjModal);
+document.getElementById("projModal").addEventListener("click", (e) => {
+  if (e.target.id === "projModal") closeProjModal(); // backdrop click
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeProjModal(); });
+
+async function load() {
+  document.getElementById("error").innerHTML = "";
+  try {
+    const res = await fetch("/api/report");
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || res.statusText);
+    render(data.report);
+  } catch (err) {
+    document.getElementById("error").innerHTML =
+      `<div class="err">Could not load report:\n${String(err.message || err)}</div>`;
+  }
+}
+
+async function logToday() {
+  const btn = document.getElementById("logBtn");
+  btn.disabled = true; btn.textContent = "Logging…";
+  try {
+    const res = await fetch("/api/log", { method: "POST" });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || res.statusText);
+    render(data.report);
+  } catch (err) {
+    document.getElementById("error").innerHTML =
+      `<div class="err">Log failed:\n${String(err.message || err)}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = "Log today";
+  }
+}
+
+document.getElementById("refreshBtn").addEventListener("click", () => { load(); loadProjects(true); });
+document.getElementById("logBtn").addEventListener("click", logToday);
+load();
+loadProjects();
+</script>
+</body>
+</html>

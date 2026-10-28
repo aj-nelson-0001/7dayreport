@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080807">
+<title>Projects — 7dayreport export</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #080807; --panel: #11110e; --panel2: #17150f; --line: #332714;
+  --yellow: #ffd447; --orange: #ff922e; --cream: #fff4cc; --muted: #a89d80;
+  --green: #a8d987; --red: #ff765e; --radius: 18px; --shadow: 0 18px 60px #0007;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0; color: var(--cream);
+  background:
+    radial-gradient(ellipse at 90% -10%, #5b371a45, transparent 34rem),
+    radial-gradient(ellipse at -10% 20%, #6b5a1628, transparent 32rem),
+    var(--bg);
+  font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+.wrap { max-width: 1100px; margin: auto; padding: 38px 26px 72px; }
+.top { display: flex; align-items: center; justify-content: space-between;
+       gap: 20px; margin-bottom: 34px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.mark { width: 42px; height: 42px; border-radius: 13px; display: grid;
+        place-items: center; color: #171107; font-weight: 1000;
+        background: linear-gradient(145deg, var(--yellow), var(--orange));
+        box-shadow: 0 6px 26px #ffb3223d; }
+.brand h1 { font-size: 16px; letter-spacing: .04em; margin: 0; color: var(--cream); }
+.brand p { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+.updated { font-size: 12px; color: var(--muted); text-align: right; }
+.updated strong { color: var(--yellow); font-weight: 650; }
+.summary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 26px; }
+.tag { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px;
+       border: 1px solid #56421d; border-radius: 100px; background: #211b0d;
+       color: var(--yellow); font-size: 11px; font-weight: 750;
+       letter-spacing: .05em; width: max-content; }
+.tag:before { content: ""; width: 6px; height: 6px; border-radius: 50%;
+              background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
+.section { margin-top: 28px; }
+.section-head { display: flex; justify-content: space-between; align-items: end;
+                gap: 16px; margin-bottom: 14px; }
+.section-head h3 { font-size: 21px; color: var(--yellow); margin: 0;
+                   letter-spacing: -.025em; }
+.section-head p { font-size: 12px; color: var(--muted); margin: 3px 0 0; }
+.count { font-size: 11px; color: var(--orange); border: 1px solid #4b3118;
+         background: #1d140d; padding: 6px 10px; border-radius: 999px;
+         white-space: nowrap; }
+.table-wrap { overflow: auto; border: 1px solid var(--line); background: #0e0e0c;
+              border-radius: var(--radius); box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; min-width: 690px; }
+th { text-align: left; text-transform: uppercase; letter-spacing: .1em;
+     font-size: 10px; color: #a99b76; padding: 14px 18px;
+     border-bottom: 1px solid var(--line); background: #14120e; }
+td { padding: 13px 18px; border-bottom: 1px solid #262117; font-size: 13px;
+     vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: #19160f; }
+.st { display: inline-block; padding: 4px 9px; border-radius: 999px;
+       font-family: ui-monospace, monospace; font-size: 12px; font-weight: 700;
+       white-space: nowrap; }
+.st-active   { background: #1c2815; color: var(--green); }
+.st-recent   { background: #211b0d; color: var(--yellow); }
+.st-dormant  { background: #2a1d0e; color: var(--orange); }
+.st-archived { background: #1b1a16; color: var(--muted); }
+.facts { color: var(--muted); font-size: 11px; white-space: nowrap;
+         text-align: right; }
+.muted { color: var(--muted); }
+.footer { border-top: 1px solid #282217; margin-top: 38px; padding-top: 17px;
+          display: flex; justify-content: space-between; gap: 12px;
+          color: #837a66; font-size: 11px; }
+.footer code { color: #d8c9a5; }
+@media (max-width: 640px) {
+  .wrap { padding: 22px 14px 48px; }
+  .top { align-items: flex-start; }
+  .facts { white-space: normal; text-align: left; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">P</div>
+      <div>
+        <h1>PROJECTS / ~/Projects</h1>
+        <p>7dayreport export · same scanner as the dashboard's projects panel</p>
+      </div>
+    </div>
+    <div class="updated">GENERATED<br><strong>2026-10-28 17:55</strong></div>
+  </header>
+
+  <div class="summary">
+    <span class="tag">29 PROJECTS</span>
+    <span class="tag">7 ACTIVE THIS WEEK</span>
+    <span class="tag">21 WITH PROGRESS DOCS</span>
+    <span class="tag">12 GIT REPOS</span>
+    <span class="tag">7 ARCHIVED</span>
+  </div>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Active</h3>
+        <p>activity within 3 days</p>
+      </div>
+      <div class="count">5 PROJECTS</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Description</th><th>Facts</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="st st-active">7dayreport</span></td>
+            <td>A dashboard that summarises Freebuff activity over the past 7 days. Zero npm dependencies — Node's built-in `http` + `fetch` (Node ≥ 18).</td>
+            <td class="facts">directory · last activity 2026-10-28 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-active">Atomic_Hippy</span></td>
+            <td>Whimsical animals in absurd situations — AI-generated, human-curated digital art sold as downloads and prints. This repo holds the storefront code, the design / launch documentation, and the artwork tooling. The artwork</td>
+            <td class="facts">git · main · last activity 2026-10-27 · 24 commits · 2 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-active">atomic-hippy</span></td>
+            <td>The Atomic Hippy Designs business plan — Gumroad + Printful print-on-demand unit economics, fee research, and launch strategy for the art brand.</td>
+            <td class="facts">directory · last activity 2026-10-28 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-active">copy_paste</span></td>
+            <td>Investigation track for the csd-clipboard copy/paste wedge — root-caused and closed, with no further action required.</td>
+            <td class="facts">directory · last activity 2026-10-28 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-active">winamp-rea</span></td>
+            <td>Reverse-engineering evidence and feature map for Winamp 5.666 Full (EN-US retail), produced with the REA skill to guide the design of the Rust player (`rustamp`).</td>
+            <td class="facts">directory · last activity 2026-10-28 · 1 progress doc</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Recent</h3>
+        <p>activity within 14 days</p>
+      </div>
+      <div class="count">11 PROJECTS</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Description</th><th>Facts</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="st st-recent">AI_Dashboard</span></td>
+            <td>A **static, offline** dashboard of your Freebuff account usage.</td>
+            <td class="facts">directory · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">amp</span></td>
+            <td>A self-hosted music library manager: Rust (axum + SQLite) backend with a SvelteKit frontend. Scans a directory of audio files, serves an interactive library UI, and plays audio straight from the browser.</td>
+            <td class="facts">git · master · last activity 2026-10-20 · 17 commits · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">cpuinfo</span></td>
+            <td>A searchable CPU benchmark dashboard. Rust workspace with three crates: a scraper that pulls PassMark data into SQLite, a WASM frontend, and an actix-web server that serves it.</td>
+            <td class="facts">directory · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">CV</span></td>
+            <td>Andrew Nelson's CV in every format, plus the generator.</td>
+            <td class="facts">directory · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">CWD</span></td>
+            <td>Two standalone static web pages: plain HTML/CSS/JS, no build step, no dependencies. Open either file directly in a browser.</td>
+            <td class="facts">directory · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">dclock</span></td>
+            <td>A minimalist digital clock for the desktop, written in Rust. Renders 5×7 bitmap digits straight into a pixel buffer with the [`minifb`](https://crates.io/crates/minifb) crate — no GPU, no framework, just a window and a f</td>
+            <td class="facts">directory · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">freebuff-dashboard</span></td>
+            <td>A standalone replacement for the Freebuff CLI's compiled-in `/dashboard` command. Zero npm dependencies — Node's built-in `http` + `fetch` only.</td>
+            <td class="facts">directory · last activity 2026-10-20 · 2 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">pacman-game</span></td>
+            <td>A Pac-Man clone written in Rust using [`macroquad`](https://crates.io/crates/macroquad) for rendering and [`rodio`](https://crates.io/crates/rodio) for sound.</td>
+            <td class="facts">git · master · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">Poly</span></td>
+            <td>**A minimal, assembly-inspired meta-language for any systems language.**</td>
+            <td class="facts">git · v2.0-dev · last activity 2026-10-24 · 193 commits · 3 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">rustamp</span></td>
+            <td>A Winamp-style music player written in pure Rust. UI: [egui/eframe](https://github.com/emilk/egui) · decoding: [symphonia](https://github.com/pdelibel/symphonia) (+ [hound](https://crates.io/crates/hound) for WAV) · outp</td>
+            <td class="facts">git · master · last activity 2026-10-18 · 2 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-recent">tetris</span></td>
+            <td>Two things live here: a browser Tetris game and a Rust sub-project.</td>
+            <td class="facts">directory · last activity 2026-10-20 · 1 progress doc</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Dormant</h3>
+        <p>no activity for over 14 days</p>
+      </div>
+      <div class="count">6 PROJECTS</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Description</th><th>Facts</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="st st-dormant">footy_predictions</span></td>
+            <td>App que consulta los próximos partidos e in-play de fútbol (ESPN public API), investiga la forma de cada equipo y calcula cuotas en varios mercados al estilo casa de apuestas (Paddy Power), con motor Poisson. UI dark-mod</td>
+            <td class="facts">git · master · last activity 2026-09-02 · 1 commits · 2 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-dormant">gods-eye-view</span></td>
+            <td>&lt;div align=&quot;center&quot;&gt;</td>
+            <td class="facts">git · main · last activity 2026-09-23 · 471 commits · 2 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-dormant">openzl</span></td>
+            <td>`openframe` is a foundational Rust rewrite of the **OpenZL** format-aware compression framework originally developed at Meta. It produces frames that begin with the real OpenZL magic number (`0xD7B1A5C0`) and the current</td>
+            <td class="facts">git · main · last activity 2026-07-11 · 10 commits · 1 progress doc</td>
+          </tr>
+          <tr>
+            <td><span class="st st-dormant">security-hardening</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">directory · last activity 2026-09-29</td>
+          </tr>
+          <tr>
+            <td><span class="st st-dormant">share_trader</span></td>
+            <td>A local web-app trading bot written in Rust. It pulls **real-time share prices and OHLC candlestick history for all FTSE 100 and NASDAQ-100 tickers** from [Twelve Data](https://twelvedata.com/) and renders an interactive</td>
+            <td class="facts">git · main · last activity 2026-09-05 · 4 commits · 3 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-dormant">skills</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">directory · no activity recorded</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <h3>Archived</h3>
+        <p>archived or dated investigation track</p>
+      </div>
+      <div class="count">7 PROJECTS</div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Project</th><th>Description</th><th>Facts</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="st st-archived">ai-harness</span></td>
+            <td>A cost-free, local-first AI coding agent harness written in Rust, inspired by Hermes Agent, Claude Code, and Freebuff's ad-supported mode.</td>
+            <td class="facts">git · main · last activity 2026-07-01 · 3 commits · 2 progress docs</td>
+          </tr>
+          <tr>
+            <td><span class="st st-archived">boot-stall-2026-09-24</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">git · master · last activity 2026-09-27 · 1 commits</td>
+          </tr>
+          <tr>
+            <td><span class="st st-archived">boot-stall-2026-09-25</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">directory · last activity 2026-09-25</td>
+          </tr>
+          <tr>
+            <td><span class="st st-archived">boot-stall-2026-09-26</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">directory · last activity 2026-09-29</td>
+          </tr>
+          <tr>
+            <td><span class="st st-archived">boot-stall-2026-09-27</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">directory · last activity 2026-10-25</td>
+          </tr>
+          <tr>
+            <td><span class="st st-archived">ollama-migration-2026-09-30</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">directory · last activity 2026-09-30</td>
+          </tr>
+          <tr>
+            <td><span class="st st-archived">plymouth-saga-2026-09-23</span></td>
+            <td><em class="muted">no README description</em></td>
+            <td class="facts">git · master · last activity 2026-09-24 · 1 commits</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <footer class="footer">
+    <span>Black / amber edition · matches AI_Dashboard palette</span>
+    <span>Regenerate with <code>node export-projects.js</code></span>
+  </footer>
+</div>
+</body>
+</html>

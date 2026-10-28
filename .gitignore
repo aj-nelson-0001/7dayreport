@@ -1,0 +1,4 @@
+node_modules/
+data/history.jsonl
+data/projects-history.jsonl
+*.log

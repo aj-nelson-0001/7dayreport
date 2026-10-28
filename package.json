@@ -1,0 +1,15 @@
+{
+  "name": "7dayreport",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Freebuff 7-day activity report — honest streak-anchored summary plus a local daily logger that builds real per-day history over time.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "log": "node snapshot.js",
+    "print": "node server.js --print"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
