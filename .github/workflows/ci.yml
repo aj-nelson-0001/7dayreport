@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # engines field claims >=18 — test the floor plus current LTS lines.
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Zero npm dependencies — no install step needed.
+      - name: Syntax check
+        run: |
+          set -euo pipefail
+          for f in *.js; do
+            echo "node --check $f"
+            node --check "$f"
+          done
+
+      # Start the server and exercise the endpoints that work without a
+      # Freebuff auth token (the token comes from the OS keychain, which CI
+      # does not have — /api/report and --print are intentionally not hit).
+      - name: Smoke test server
+        run: |
+          set -euo pipefail
+
+          # Fixture projects root — ~/Projects does not exist on runners,
+          # and /api/projects 502s when its root is unreadable.
+          FIXTURE="$RUNNER_TEMP/projects-fixture"
+          mkdir -p "$FIXTURE/demo-project/src"
+          echo "demo" > "$FIXTURE/demo-project/README.md"
+
+          PROJECTS_ROOT="$FIXTURE" node server.js &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+
+          # Wait for the port to accept connections (max ~15s).
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:4177/ >/dev/null; then break; fi
+            sleep 0.5
+          done
+
+          echo "GET / -> expect index.html"
+          curl -sf http://127.0.0.1:4177/ | grep -qi "<!DOCTYPE html"
+
+          echo "GET /api/history -> expect JSON rows"
+          curl -sf http://127.0.0.1:4177/api/history | grep -q '"rows"'
+
+          echo "GET /api/projects/history -> expect JSON rows"
+          curl -sf http://127.0.0.1:4177/api/projects/history | grep -q '"rows"'
+
+          echo "GET /api/projects -> expect JSON (may be empty outside ~/Projects)"
+          curl -sf http://127.0.0.1:4177/api/projects | grep -q '"projects"'
+
+          echo "GET /projects.html -> static route"
+          curl -sf http://127.0.0.1:4177/projects.html | grep -qi "<!DOCTYPE html"
+
+          echo "smoke test passed"
